@@ -1,0 +1,19 @@
+{
+  "name": "inventober",
+  "version": "1.0.0",
+  "description": "",
+  "main": "scale.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rmkubik/inventober.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rmkubik/inventober/issues"
+  },
+  "homepage": "https://github.com/rmkubik/inventober#readme"
+}
