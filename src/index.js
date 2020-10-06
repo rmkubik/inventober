@@ -1,20 +1,14 @@
 import ReactDOM from "react-dom";
 import React, { useState } from "react";
-import { useDrag, useDrop, DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import { useSwipeable, Swipeable } from "react-swipeable";
 import {
   constructMatrixFromTemplate,
   getLocation,
   mapMatrix,
   updateMatrix,
 } from "functional-game-utils";
-import { move } from "ramda-adjunct";
 
 const TILE_SIZE = 32;
-
-const ItemTypes = {
-  CARD: "CARD",
-};
 
 const parseMapTemplate = constructMatrixFromTemplate((char) => {
   switch (char) {
@@ -27,61 +21,18 @@ const parseMapTemplate = constructMatrixFromTemplate((char) => {
   }
 });
 
-function Draggable({ isDragging, children, location }) {
-  const [{ opacity }, dragRef] = useDrag({
-    item: { type: ItemTypes.CARD, location },
-    collect: (monitor) => ({
-      opacity: monitor.isDragging() ? 0.5 : 1,
-    }),
-  });
-
-  return (
-    <div ref={dragRef} style={{ opacity }}>
-      {children}
-    </div>
-  );
-}
-
-function Droppable({ children, onDrop }) {
-  const [{ isOver }, dropRef] = useDrop({
-    accept: ItemTypes.CARD,
-    drop: onDrop,
-    collect: (monitor) => ({
-      isOver: !!monitor.isOver(),
-    }),
-  });
-
-  return (
-    <div ref={dropRef} style={{ backgroundColor: isOver ? "yellow" : "" }}>
-      {children}
-    </div>
-  );
-}
-
 function Tile({ icon, bgColor, location, isOver, moveTile }) {
-  const Wrapper = Boolean(icon) ? Draggable : Droppable;
-
   return (
-    <Wrapper
-      location={location}
-      onDrop={(item, monitor) => {
-        const oldLocation = item.location;
-        const newLocation = location;
-
-        moveTile(oldLocation, newLocation);
+    <div
+      style={{
+        backgroundColor: bgColor,
+        width: `${TILE_SIZE}px`,
+        height: `${TILE_SIZE}px`,
+        border: "1px black solid",
       }}
     >
-      <div
-        style={{
-          backgroundColor: bgColor,
-          width: `${TILE_SIZE}px`,
-          height: `${TILE_SIZE}px`,
-          border: "1px black solid",
-        }}
-      >
-        {icon}
-      </div>
-    </Wrapper>
+      {icon}
+    </div>
   );
 }
 
@@ -113,9 +64,25 @@ const App = () => {
         . . . . . . . . . .
     `)
   );
+  const swipeableConfig = {
+    trackTouch: true,
+    trackMouse: true,
+  };
+  // NOT_SWIPING, MOUSE_DOWN, SWIPING
+  const [swipingState, setSwipingState] = useState("NOT_SWIPING");
+  const [initalSwipLocation, setInitialSwipeLocation] = useState();
+  const swipeHandlers = useSwipeable({
+    onSwiped: (eventData) => console.log("swiped", eventData),
+    onSwipedLeft: (eventData) => console.log("left", eventData),
+    onSwipedRight: (eventData) => console.log("right", eventData),
+    onSwipedUp: (eventData) => console.log("up", eventData),
+    onSwipedDown: (eventData) => console.log("down", eventData),
+    onSwiping: (eventData) => console.log("swiping", eventData),
+    ...swipeableConfig,
+  });
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <div {...swipeHandlers}>
       <Grid
         tiles={tiles}
         renderTile={(tile, location) => (
@@ -142,7 +109,7 @@ const App = () => {
           />
         )}
       />
-    </DndProvider>
+    </div>
   );
 };
 
